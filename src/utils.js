@@ -15,4 +15,9 @@ const isMatch = (password, confirmPassword) => {
   return password === confirmPassword ? true : false;
 };
 
-export { validateEmail, validatePassword, isMatch };
+const validatePhoneNumber = (number) => {
+  var phonenoRegx = /^\d{10}$/;
+  return phonenoRegx.test(number);
+};
+
+export { validateEmail, validatePassword, isMatch, validatePhoneNumber };

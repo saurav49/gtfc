@@ -1,13 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./style.module.css";
 import { useNavigate, Navigate } from "react-router";
-import { validateEmail, validatePassword, isMatch } from "../utils";
-import Loader from "react-loader-spinner";
+import {
+  validateEmail,
+  validatePassword,
+  isMatch,
+  validatePhoneNumber,
+} from "../utils";
+import { TailSpin } from "react-loader-spinner";
 import { AiFillEye, AiTwotoneEyeInvisible } from "../Icons/Icon";
+import { useAuth } from "../hooks/useAuth";
 
 const Signup = () => {
   const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,13 +21,21 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  let { handleSignup, authLoader, token } = useAuth();
 
-  useEffect(() => {}, []);
+  if (!token) {
+    if (localStorage.getItem("gtfc__token")) {
+      token = localStorage.getItem("gtfc__token");
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (name.length === 0) return setError("name cannot be empty");
     if (!validateEmail(email)) return setError("Enter valid email id");
+    if (!validatePhoneNumber(phone))
+      return setError("Enter valid Phone Number");
     if (!validatePassword(password))
       return setError(
         "Password should contain atleast 6 characters of atleast lowercase, uppercase and numeric integer"
@@ -31,18 +45,20 @@ const Signup = () => {
 
     setError("");
 
+    console.log("here");
+    handleSignup(name, phone, email, password);
+
     setName("");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
-    setUsername("");
+    setPhone("");
   };
 
   return (
     <>
-      {/* <Navbar /> */}
-      {false ? (
-        <Navigate to={"/feed"} replace />
+      {token ? (
+        <Navigate to={"/"} replace />
       ) : (
         <div className={styles.signupPage}>
           <div className={styles.signupContainer}>
@@ -60,18 +76,18 @@ const Signup = () => {
               <div className={styles.inptWrapper}>
                 <input
                   type="text"
-                  value={username}
-                  placeholder="Username"
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
                   className={styles.input}
                 />
               </div>
               <div className={styles.inptWrapper}>
                 <input
                   type="text"
-                  value={email}
-                  placeholder="Email"
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={phone}
+                  placeholder="Phone Number"
+                  onChange={(e) => setPhone(e.target.value)}
                   className={styles.input}
                 />
               </div>
@@ -127,18 +143,17 @@ const Signup = () => {
                   />
                 )}
               </div>
-              {error && <p>{error}</p>}
+              {error && (
+                <p className="text-red-500 italic text-sm font-bold text-center">
+                  {error}
+                </p>
+              )}
               <button
                 type="submit"
                 className="bg-slate-500 hover:bg-slate-400 text-white font-bold py-3 px-10 border-b-4 my-4 border-slate-700 hover:border-slate-500 rounded uppercase"
               >
-                {false ? (
-                  <Loader
-                    type="ThreeDots"
-                    color="#fff"
-                    height={13}
-                    width={120}
-                  />
+                {authLoader ? (
+                  <TailSpin color="#fff" height={23} width={120} />
                 ) : (
                   <span>create account</span>
                 )}
